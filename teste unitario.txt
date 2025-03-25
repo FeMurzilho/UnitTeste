@@ -1,0 +1,40 @@
+import pytest
+import json
+from app import app
+
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
+
+def test_create_category(client):
+    response = client.post('/categories', json={
+        'category_id': 1,
+        'category_name': 'Electronics',
+        'description': 'Gadgets and devices',
+        'picture': None
+    })
+    assert response.status_code == 201
+    assert response.get_json() == {"message": "Category created successfully"}
+
+def test_read_category(client):
+    # Pré-condição: A categoria precisa estar no banco de dados
+    response = client.get('/categories/1')
+    assert response.status_code == 200
+    category = response.get_json()
+    assert category['category_id'] == 1
+    assert category['category_name'] == 'Electronics'
+
+def test_update_category(client):
+    response = client.put('/categories/1', json={
+        'category_name': 'Updated Electronics',
+        'description': 'Updated gadgets',
+        'picture': None
+    })
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Category updated successfully"}
+
+def test_delete_category(client):
+    response = client.delete('/categories/1')
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Category deleted successfully"}
